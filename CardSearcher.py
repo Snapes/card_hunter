@@ -173,18 +173,22 @@ class CardSearcher():
     # async def run_search(self, cards):
     #     self.find_card(cards)
     #     return self.display_prices()
+    async def parse_price(self, session, parser, card):
+        resp = await session.get(parser.url + card)
+        response = await resp.text()
+        return parser.get_price(response, card)
 
     def get_prices(self, card):
         asyncio.run(self.await_get_prices(card))
 
     async def await_get_prices(self, card):
-        prices = [card]
+        self.price_data = [card]
         async with aiohttp.ClientSession() as session:
+            tasks = []
             for parser in self.parsers:
-                async with session.get(parser.url + card) as resp:
-                    response = await resp.text()
-                    prices.append(parser.get_price(response, card))
-        self.price_data = prices
+                tasks.append(self.parse_price(session, parser, card))                   
+            prices = await asyncio.gather(*tasks, return_exceptions=True)
+        self.price_data += prices
                     
     def search_card(self, card):
         self.get_prices(card)

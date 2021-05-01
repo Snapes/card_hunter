@@ -3,7 +3,7 @@ import pandas as pd
 
 
 card_searcher = CardSearcher()
-cards = ["Fervor","Thunderblust"]
+cards = ["Cauldron of Souls","Unspeakable Symbol", "Trophy Mage"]
 prices = []
 for card in cards:
     print(f"Getting prices for {card}")

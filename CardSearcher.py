@@ -16,9 +16,11 @@ class Parser(ABC):
     def get_price(self, response_text, card_name):
         pass
 
-class HareruyaParser(Parser):
-    name = 'Hareruya'
+class HareruyaParser(Parser):    
     url = 'https://www.hareruyamtg.com/en/products/search?suggest_type=all&product='
+    def __init__(self, language):
+        self.name = f'Hareruya {language}'
+        self.language = language
 
     def get_price(self, response_text, card_name):
         price_list = []
@@ -26,6 +28,9 @@ class HareruyaParser(Parser):
         for item in soup.find_all('div', attrs={'class': 'itemData'}):
             try:                
                 card = card_name
+                language = re.search(fr'【{self.language}】', item.find("a", recursive=True).string, flags=re.IGNORECASE)
+                if not language:
+                    continue
                 name =  re.search(fr'《({card})》', item.find("a", recursive=True).string, flags=re.IGNORECASE).groups(1)[0]
                 stock = int(re.search(r"【NM Stock:(\d)】", item.find("p", attrs={'class': 'itemDetail__stock'}, recursive=True).string).groups(1)[0])
                 price = int(re.search(r"¥ ([\d,]*)", item.find("p", attrs={'class': 'itemDetail__price'}, recursive=True).string).groups(1)[0].replace(',',''))
@@ -40,10 +45,9 @@ class HareruyaParser(Parser):
 class HobbymasterParser(Parser):
     name = 'Hobbymaster'
     url = 'https://hobbymaster.co.nz/cards/get-cards?foil=0&lang=&game=1&_search=true&sidx=set&sord=desc&name='
-    is_json = True
 
     def get_price(self, response_text, card_name):
-        data = response_text
+        data = json.loads(response_text)
         price_list = []
         if 'rows' in data:
             for item in data['rows']:
@@ -116,6 +120,7 @@ class ShopifyParser(Parser):
     def __init__(self, url, name):
         self.url = url
         self.name = name
+
     def get_price(self, response_text, card_name):
     #     soup = BeautifulSoup(html_content, "lxml")
         soup = BeautifulSoup(response_text, features="html.parser")
@@ -153,8 +158,9 @@ class ShopifyParser(Parser):
 
 class CardSearcher():
     parsers = [
-        # HobbymasterParser(),
-        HareruyaParser(),
+        HobbymasterParser(),
+        HareruyaParser(language="EN"),
+        HareruyaParser(language="JP"),
         BaydragonParser(),
         GoblinGamesParser(),
         ShopifyParser('https://spellboundgames.co.nz/search?q=', 'Spellbound'),
@@ -176,7 +182,7 @@ class CardSearcher():
         async with aiohttp.ClientSession() as session:
             for parser in self.parsers:
                 async with session.get(parser.url + card) as resp:
-                    response = await resp.json() if parser.is_json else await resp.text()
+                    response = await resp.text()
                     prices.append(parser.get_price(response, card))
         self.price_data = prices
                     

@@ -5,7 +5,7 @@ from CardSearcher import CardSearcher
 app = Flask(__name__)
 api = Api(app)
 
-class HelloWorld(Resource):
+class CardApi(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -14,10 +14,7 @@ class HelloWorld(Resource):
         card_searcher = CardSearcher()
         return card_searcher.search_card(args['card'])
 
-    def get(self):
-        return {'hello': 'world'}
-
-api.add_resource(HelloWorld, '/')
+api.add_resource(CardApi, '/')
 
 if __name__ == '__main__':
     app.run(debug=True)

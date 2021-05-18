@@ -21,6 +21,7 @@ class HareruyaParser(Parser):
     def __init__(self, language):
         self.name = f'Hareruya {language}'
         self.language = language
+        self.key = f"hareyuya{language}"
 
     def get_price(self, response_text, card_name):
         price_list = []
@@ -45,6 +46,7 @@ class HareruyaParser(Parser):
 class HobbymasterParser(Parser):
     name = 'Hobbymaster'
     url = 'https://hobbymaster.co.nz/cards/get-cards?foil=0&lang=&game=1&_search=true&sidx=set&sord=desc&name='
+    key = 'hobbymaster'
 
     def get_price(self, response_text, card_name):
         data = json.loads(response_text)
@@ -69,6 +71,7 @@ class HobbymasterParser(Parser):
 class BaydragonParser(Parser):
     name = 'Baydragon'
     url = 'https://www.baydragon.co.nz/search/category/01?searchType=single&searchString='
+    key = 'baydragon'
 
     def get_price(self, response_text, card_name):
         soup = BeautifulSoup(response_text, features="html.parser")
@@ -95,6 +98,7 @@ class BaydragonParser(Parser):
 class GoblinGamesParser(Parser):
     name = 'Goblin Games'
     url = 'https://goblingames.nz/search?q='
+    key = "goblingames"
 
     def get_price(self, response_text, card_name):
         soup = BeautifulSoup(response_text, features="html.parser")
@@ -117,9 +121,10 @@ class GoblinGamesParser(Parser):
         return price
 
 class ShopifyParser(Parser):
-    def __init__(self, url, name):
+    def __init__(self, url, name, key):
         self.url = url
         self.name = name
+        self.key = key
 
     def get_price(self, response_text, card_name):
     #     soup = BeautifulSoup(html_content, "lxml")
@@ -163,10 +168,10 @@ class CardSearcher():
         HareruyaParser(language="JP"),
         BaydragonParser(),
         GoblinGamesParser(),
-        ShopifyParser('https://spellboundgames.co.nz/search?q=', 'Spellbound'),
-        ShopifyParser('https://magicatwillis.co.nz/search?q=', 'Magic at Willis'),
-        ShopifyParser('https://ironknightgaming.co.nz/search?q=', 'Iron Knight Gaming'),
-        ShopifyParser('https://mtgmagpie.com/search?q=', 'Magic Magpie')
+        ShopifyParser('https://spellboundgames.co.nz/search?q=', 'Spellbound', 'spellbound'),
+        ShopifyParser('https://magicatwillis.co.nz/search?q=', 'Magic at Willis', 'willis'),
+        ShopifyParser('https://ironknightgaming.co.nz/search?q=', 'Iron Knight Gaming', 'ironknight'),
+        ShopifyParser('https://mtgmagpie.com/search?q=', 'Magic Magpie', 'magpie')
     ]
     price_data = []
 
@@ -194,5 +199,5 @@ class CardSearcher():
         self.get_prices(card)
         return self.price_data
 
-    def display_parsers(self):
-        return list(parser.name for parser in self.parsers)
+    def get_headers(self):
+        return ["Card"] + list(parser.name for parser in self.parsers)

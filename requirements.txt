@@ -76,10 +76,10 @@ toml==0.10.2
 tornado==6.1
 traitlets==5.0.5
 typing-extensions==3.7.4.3
-urllib3==1.26.4
+urllib3==2.6.3
 wcwidth==0.2.5
 webencodings==0.5.1
-Werkzeug==1.0.1
+Werkzeug==3.1.5
 widgetsnbextension==3.5.1
 wrapt==1.12.1
 yarl==1.6.3
